@@ -29,6 +29,9 @@ class Brain():
             ['WR', 'WN', 'WB', 'WQ', 'WK', 'WB', 'WN', 'WR']
         ]
         
+        self.move_Functions = {'P': self.get_Pawn_Moves, 'R': self.get_Rook_Moves, 'N': self.get_Knight_Moves,
+                               'B': self.get_Bishop_Moves, 'Q': self.get_Queen_Moves, 'K': self.get_King_Moves}
+        
         self.white_Turn = True
         self.move_Log = []
         
@@ -55,29 +58,106 @@ class Brain():
                 turn = self.board[r][c][0]
                 if (turn == 'W' and self.white_Turn) or (turn == 'B' and not self.white_Turn):
                     piece = self.board[r][c][1]
-                    if piece == 'P':
-                        self.get_Pawn_Moves(r, c, moves)
-                    elif piece == 'R':
-                        self.get_Rook_Moves(r, c, moves)
+                    self.move_Functions[piece](r, c, moves)
         return moves
 
     def get_Pawn_Moves(self, r, c, moves):
-        pass
+        if self.white_Turn:
+            if self.board[r - 1][c] == '  ':
+                moves.append(Move((r,c), (r - 1, c), self.board))
+                if r == 6 and self.board[r - 2][c] == '  ': #Checks to see if the square in two squares in front of the pawn is empty
+                    moves.append(Move((r, c), (r - 2, c), self.board))
+            
+            if c - 1 >= 0:
+                if self.board[r - 1][c - 1][0] == 'B':
+                    moves.append(Move((r, c), (r - 1, c - 1), self.board))
+                        
+            if c + 1 <= 7:
+                if self.board[r - 1][c + 1][0] == 'B':
+                    moves.append(Move((r, c), (r - 1, c + 1), self.board))
+     
+        else:    
+            if self.board[r + 1][c] == '  ': #Checks to see if the square in front of the pawn is empty
+                moves.append(Move((r,c), (r + 1,c), self.board))
+                if r == 1 and self.board[r + 2][c] == '  ': #Checks to see if the square in two squares in front of the pawn is empty
+                    moves.append(Move((r, c), (r + 2, c), self.board))
+            
+            if c - 1 >= 0:
+                if self.board[r + 1][c - 1][0] == 'W':
+                    moves.append(Move((r, c), (r + 1, c - 1), self.board))
+  
+            if c + 1 <= 7:
+                if self.board[r + 1][c + 1][0] == 'W':
+                    moves.append(Move((r, c), (r + 1, c + 1), self.board))
         
     def get_Rook_Moves(self, r, c, moves):
-        pass
+        directions = ((-1, 0), (0, -1), (1, 0), (0, 1))
+        enemy_Color = 'B' if self.white_Turn else 'W'
+        
+        for d in directions:
+            for i in range(1, 8):
+                end_Row = r + d[0] * i
+                end_Col = c + d[1] * i
+                
+                if 0 <= end_Row < 8 and 0 <= end_Col < 8:
+                    end_Piece = self.board[end_Row][end_Col]
+                    if end_Piece == '  ':
+                        moves.append(Move((r,c), (end_Row, end_Col), self.board))
+                    elif end_Piece[0] == enemy_Color:
+                        moves.append(Move((r, c), (end_Row, end_Col), self.board))
+                        break
+                    else:
+                        break
+                else:
+                    break
     
     def get_Bishop_Moves(self, r, c, moves):
-        pass
+        directions = ((-1, -1), (-1, 1), (1, -1), (1, 1))
+        enemy_Color = 'B' if self.white_Turn else 'W'
+        
+        for d in directions:
+            for i in range(1, 8):
+                end_Row = r + d[0] * i
+                end_Col = c + d[1] * i
+                
+                if 0 <= end_Row < 8 and 0 <= end_Col < 8:
+                    end_Piece = self.board[end_Row][end_Col]
+                    if end_Piece == '  ':
+                        moves.append(Move((r,c), (end_Row, end_Col), self.board))
+                    elif end_Piece[0] == enemy_Color:
+                        moves.append(Move((r, c), (end_Row, end_Col), self.board))
+                        break
+                    else:
+                        break
+                else:
+                    break
     
     def get_Knight_Moves(self, r, c, moves):
-        pass
-    
+        knight_Moves = ((-2, -1), (-2, 1), (-1, -2), (-1, 2), (1, 2), (2, -1), (2, 1))
+        ally_Color = 'W' if self.white_Turn else 'B'
+        for n in knight_Moves:
+            end_Row = r + n[0]
+            end_Col = c + n[1]
+            if 0 <= end_Row < 8 and 0 <= end_Col < 8:
+                end_Piece = self.board[end_Row][end_Col]
+                if end_Piece[0] != ally_Color:
+                    moves.append(Move((r, c), (end_Row, end_Col), self.board))
+        
     def get_Queen_Moves(self, r, c, moves):
-        pass
+        self.get_Rook_Moves(r, c, moves)
+        self.get_Bishop_Moves(r, c, moves)
     
     def get_King_Moves(self, r, c, moves):
-        pass    
+        king_Moves = ((-1, -1), (-1, 0), (-1, -1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1))
+        ally_Color = 'W' if self.white_Turn else 'B'
+        for i in range(8):
+            end_Row = r + king_Moves[i][0]
+            end_Col = r + king_Moves[i][1]
+            if 0 <= end_Row < 8 and 0 <= end_Col < 8:
+                end_Piece = self.board[end_Row][end_Col]
+                if end_Piece[0] != ally_Color:
+                    moves.append(Move((r, c), (end_Row, end_Col), self.board))
+
 #####################################################################        
 #####################################################################
 ##################################################################### 

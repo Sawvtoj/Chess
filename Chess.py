@@ -60,9 +60,10 @@ def main():
                     if move in valid_Moves:
                         gs.make_Move(move)
                         move_Made = True
-                    
-                    sq_Selected = ()
-                    player_Clicks = []
+                        sq_Selected = ()
+                        player_Clicks = []
+                    else:
+                        player_Clicks = [sq_Selected]
                    
             elif e.type == p.KEYDOWN:
                 if e.key == p.K_z:
