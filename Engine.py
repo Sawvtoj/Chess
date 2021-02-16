@@ -133,7 +133,18 @@ class Brain():
                     break
     
     def get_Knight_Moves(self, r, c, moves):
-        knight_Moves = ((-2, -1), (-2, 1), (-1, -2), (-1, 2), (1, 2), (2, -1), (2, 1))
+        knight_Moves = ((-2, -1), (-2, 1), (-1, -2), (-1, 2), (1, 2), (1, -2), (2, -1), (2, 1))
+        #Up 2, 1 right or left
+        #(-2, -1), (-2, 1)
+        
+        #Up 1, 2 right or left
+        #(-1, -2), (-1, 2)
+        
+        #2 right or left, 1 down
+        #(1, 2), (1, -2)
+        
+        #1 right or left, 2 down
+        #(2, -1), (2, 1)
         ally_Color = 'W' if self.white_Turn else 'B'
         for n in knight_Moves:
             end_Row = r + n[0]
@@ -152,7 +163,7 @@ class Brain():
         ally_Color = 'W' if self.white_Turn else 'B'
         for i in range(8):
             end_Row = r + king_Moves[i][0]
-            end_Col = r + king_Moves[i][1]
+            end_Col = c + king_Moves[i][1]
             if 0 <= end_Row < 8 and 0 <= end_Col < 8:
                 end_Piece = self.board[end_Row][end_Col]
                 if end_Piece[0] != ally_Color:
