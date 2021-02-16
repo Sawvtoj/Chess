@@ -5,7 +5,7 @@ The brain behind the whole chess game
 class Brain():
     
     def __init__(self):
-        
+         
         '''
         B = Black
         Q = White
@@ -34,12 +34,23 @@ class Brain():
         
         self.white_Turn = True
         self.move_Log = []
+        self.wKing_Location = (7, 4)
+        self.bKing_Location = (0, 4)
+        self.checkmate = False
+        self.stalemate = False
         
     def make_Move(self, move):
         self.board[move.start_Row][move.start_Col] = '  '
         self.board[move.end_Row][move.end_Col] = move.piece_Moved
         self.move_Log.append(move)
         self.white_Turn = not self.white_Turn #change turns 
+        
+        #Update the King's Location
+        if move.piece_Moved == 'WK':
+            self.wKing_Location = (move.end_Row, move.end_Col)
+        if move.piece_Moved == 'BK':
+            self.bKing_Location = (move.end_Row, move.end_Col)
+        
 
     def undo_Move(self):
         if len(self.move_Log) != 0:
@@ -47,10 +58,57 @@ class Brain():
             self.board[move.start_Row][move.start_Col] = move.piece_Moved
             self.board[move.end_Row][move.end_Col] = move.piece_Captured
             self.white_Turn = not self.white_Turn
+        
+            #Update the King's Location
+            if move.piece_Moved == 'WK':
+                self.wKing_Location = (move.start_Row, move.start_Col)
+            if move.piece_Moved == 'BK':
+                self.bKing_Location = (move.start_Row, move.start_Col)
+            
             
     def get_Valid_Moves(self):
-        return self.get_All_Possible_Moves()
+        moves = self.get_All_Possible_Moves()
+        
+        for i in range(len(moves)-1, -1, -1):
+            
+            self.make_Move(moves[i])
+            
+            self.white_Turn = not self.white_Turn
+            
+            if self.in_Check():
+                moves.remove(moves[i])
+            
+            self.white_Turn = not self.white_Turn   #Switch back turn
+            self.undo_Move()
+        
+        if len(moves) == 0: #Either checkmate or stalemate
+            if self.in_Check():
+                self.checkmate = True
+            else:
+                self.stalemate = True
+        else:
+            self.checkmate = False
+            self.stalemate = False
+        return moves
     
+    def in_Check(self):
+        if self.white_Turn:
+            return self.square_Under_Attack(self.wKing_Location[0], self.wKing_Location[1])
+        else:
+            return self.square_Under_Attack(self.bKing_Location[0], self.bKing_Location[1])
+
+    def square_Under_Attack(self, r, c):
+        self.white_Turn = not self.white_Turn
+        
+        opp_Moves = self.get_All_Possible_Moves()
+        
+        self.white_Turn = not self.white_Turn   #Switch back turn
+        
+        for move in opp_Moves:
+            if move.end_Row == r and move.end_Col == c: #Square is under attack
+                return True
+        return False
+
     def get_All_Possible_Moves(self): 
         moves = []
         for r in range(len(self.board)):
